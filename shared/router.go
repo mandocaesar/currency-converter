@@ -82,5 +82,10 @@ func (r *Router) SetupRouter() *gin.Engine {
 		})
 	}
 
+	exchange := router.Group("api/v1")
+	{
+		exchange.POST("/exchange", r.converterController.AddExchange)
+	}
+
 	return router
 }
