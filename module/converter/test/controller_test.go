@@ -16,3 +16,10 @@ func TestAPIAddExchange(t *testing.T) {
 	response := shared.DispatchRequest(router, "POST", "/api/v1/exchange", payload)
 	assert.Equal(t, http.StatusOK, response.Code)
 }
+
+func TestAPIAddDailyExchangeData(t *testing.T) {
+	Init()
+	payload := bytes.NewBuffer([]byte(`{"Date":"2018-07-01","From":"USD","To":"GBP","Rate":"0.75709"}`))
+	response := shared.DispatchRequest(router, "POST", "/api/v1/exchange/daily", payload)
+	assert.Equal(t, http.StatusOK, response.Code)
+}

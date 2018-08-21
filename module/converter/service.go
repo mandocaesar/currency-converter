@@ -40,3 +40,8 @@ func (s *Service) AddExchange(from string, to string) (uuid.UUID, error) {
 	return exchange.ID, nil
 
 }
+
+//AddDailyRequest : function to add daily exchange rate
+func (s *Service) AddDailyRequest(from string, to string, exchangeDate string, rate float32) (uuid.UUID, error) {
+	return uuid.Nil, nil
+}
