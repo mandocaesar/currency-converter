@@ -39,6 +39,7 @@ func (d *DbMigration) Migrate(seed bool) (bool, error) {
 
 	d.connection.AutoMigrate(
 		&converterModel.Exchange{},
+		&converterModel.DailyRate{},
 	)
 
 	if seed {
