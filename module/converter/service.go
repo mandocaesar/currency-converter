@@ -33,8 +33,8 @@ func (s *Service) AddExchange(from string, to string) (uuid.UUID, error) {
 	tx := s.db.Begin()
 	exchange := &model.Exchange{Source: from, Target: to}
 
-	if err := tx.First(&exchange, "Source = ? AND Target = ?", from, to).Error; err != nil {
-		return uuid.Nil, err
+	if !tx.First(&exchange, "Source = ? AND Target = ?", from, to).RecordNotFound() {
+		return uuid.Nil, errors.New("Exchange already registered")
 	}
 
 	if err := tx.Create(exchange).Error; err != nil {

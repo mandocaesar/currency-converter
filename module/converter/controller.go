@@ -2,6 +2,7 @@ package converter
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/currency-converter/module/converter/messages"
 	"github.com/gin-gonic/gin"
@@ -41,7 +42,9 @@ func (c *Controller) AddDailyRate(ctx *gin.Context) {
 	var req messages.AddDailyRateRequest
 	err := ctx.ShouldBindWith(&req, binding.JSON)
 	if err == nil {
-		id, err := c.converterService.AddDailyExchange(req.From, req.To, req.ExchangeDate, req.Rate)
+		rate, err := strconv.ParseFloat(req.Rate, 32)
+
+		id, err := c.converterService.AddDailyExchange(req.From, req.To, req.ExchangeDate, float32(rate))
 		if err == nil {
 			ctx.JSON(http.StatusOK, gin.H{"result": "success", "id": id})
 		} else {
