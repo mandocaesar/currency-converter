@@ -75,3 +75,22 @@ func (c *Controller) TrendLast7(ctx *gin.Context) {
 
 	return
 }
+
+//Tracked : function to get tracked list
+func (c *Controller) Tracked(ctx *gin.Context) {
+	var req messages.TrackedRequest
+	err := ctx.ShouldBindWith(&req, binding.JSON)
+	if err == nil {
+
+		result, err := c.converterService.TrackerRates(req.Date, req.Exchanges)
+		if err == nil {
+			ctx.JSON(http.StatusOK, gin.H{"result": "success", "data": result})
+		} else {
+			ctx.JSON(http.StatusBadRequest, gin.H{"result": "success", "error": err.Error(), "id": 0})
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, gin.H{"result": "failed", "error": err.Error(), "id": 0})
+	}
+
+	return
+}

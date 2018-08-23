@@ -3,6 +3,7 @@ package converter
 import (
 	"errors"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/currency-converter/module/converter/messages"
@@ -129,4 +130,61 @@ func (s *Service) ExchangeRateLast7(from string, to string, exchangeDate string)
 	r := &messages.Exchange7DaysResponse{From: from, To: to, Average: avg, Variance: variance, Data: data}
 
 	return r, nil
+}
+
+//TrackerRates : function to get tracked list of exchanges with specific date
+func (s *Service) TrackerRates(Date string, data []*messages.ExchangeRequest) (*[]messages.TrackedResponse, error) {
+	var responses []messages.TrackedResponse
+
+	dt, err := time.Parse("2006-01-02", Date)
+	if err != nil {
+		return nil, err
+	}
+
+	if (Date == "") || (len(data) == 0) {
+		return nil, errors.New("Date empty or list of exchanges is empty")
+	}
+
+	for index := 0; index < len(data); index++ {
+		var exchangeModel model.Exchange
+		var dailyRateModel model.DailyRate
+
+		response := messages.TrackedResponse{}
+		result, err := s.ExchangeRateLast7(data[index].From, data[index].To, Date)
+		if err != nil {
+			if err.Error() != "No Daily exchange rate available" {
+				glog.Infof("ExchangeRateLast7 , err=?", err)
+				return nil, err
+			}
+		}
+
+		if err := s.db.Find(&exchangeModel, "Source = ? AND Target = ?", data[index].From, data[index].To).Error; err != nil {
+			glog.Infof("ExchangeModel , err=?", err)
+			return nil, err
+		}
+
+		response.From = data[index].From
+		response.To = data[index].To
+
+		if result != nil {
+			if len(result.Data) == 7 {
+				if err := s.db.First(&dailyRateModel, "exchange_id = ? and exchange_date = ?", exchangeModel.ID, dt.Format("2006-01-02")).Error; err != nil {
+					glog.Infof("dailyRateModel , err=?", err)
+					return nil, err
+				}
+				response.Avg = strconv.FormatFloat(result.Average, 'f', 6, 64)
+				response.Rate = strconv.FormatFloat(dailyRateModel.Rate, 'f', 6, 64)
+			} else {
+				response.Rate = "insufficient data"
+				response.Avg = ""
+			}
+		} else {
+			response.Rate = "insufficient data"
+			response.Avg = ""
+		}
+
+		responses = append(responses, response)
+	}
+
+	return &responses, nil
 }
