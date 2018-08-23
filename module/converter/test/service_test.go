@@ -38,3 +38,12 @@ func TestExchangeRateLast7(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.NotEmpty(t, result.Data)
 }
+
+func TestTrackedRates(t *testing.T) {
+	Init()
+	request := &messages.TrackedRequest{Date: "2018-08-01"}
+
+	result, err := service.TracketRates(request.From, request.To, request.Date)
+	assert.Equal(t, nil, err)
+	assert.NotEmpty(t, result.Data)
+}
