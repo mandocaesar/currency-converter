@@ -20,7 +20,7 @@ func TestAddDailyData(t *testing.T) {
 	Init()
 	request := &messages.AddDailyRateRequest{
 		From:         "USD",
-		To:           "GBP",
+		To:           "IDR",
 		ExchangeDate: "2018-01-09",
 		Rate:         "0.171717"}
 
@@ -41,9 +41,16 @@ func TestExchangeRateLast7(t *testing.T) {
 
 func TestTrackedRates(t *testing.T) {
 	Init()
+	exchange1 := &messages.ExchangeRequest{From: "USD", To: "GBP"}
+	exchange2 := &messages.ExchangeRequest{From: "USD", To: "IDR"}
+	exchange3 := &messages.ExchangeRequest{From: "JPY", To: "IDR"}
 	request := &messages.TrackedRequest{Date: "2018-08-01"}
 
-	result, err := service.TracketRates(request.From, request.To, request.Date)
+	request.Exchanges = append(request.Exchanges, exchange1)
+	request.Exchanges = append(request.Exchanges, exchange2)
+	request.Exchanges = append(request.Exchanges, exchange3)
+
+	result, err := service.TrackerRates(request.Date, request.Exchanges)
 	assert.Equal(t, nil, err)
-	assert.NotEmpty(t, result.Data)
+	assert.NotEmpty(t, result)
 }

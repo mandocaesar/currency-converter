@@ -87,6 +87,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 		exchange.POST("/exchange", r.converterController.AddExchange)
 		exchange.POST("/daily", r.converterController.AddDailyRate)
 		exchange.POST("/last7", r.converterController.TrendLast7)
+		exchange.POST("/tracked", r.converterController.Tracked)
 	}
 
 	return router

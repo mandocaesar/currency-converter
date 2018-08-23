@@ -33,7 +33,7 @@ func TestAPIExchangeRateLast7(t *testing.T) {
 
 func TestAPITrackedRates(t *testing.T) {
 	Init()
-	payload := bytes.NewBuffer([]byte(`{"Date":"2018-08-01", "Exchanges":[{"From":"USD","To":"GBP"},{"From":"USD","To":"IDR"},{"From":"JPY","To":"IDR"},]`))
+	payload := bytes.NewBuffer([]byte(`{"Date":"2018-08-01", "Exchanges":[{"From":"USD","To":"GBP"},{"From":"USD","To":"IDR"},{"From":"JPY","To":"IDR"}]}`))
 	response := shared.DispatchRequest(router, "POST", "/api/v1/tracked", payload)
 	assert.Equal(t, http.StatusOK, response.Code)
 }
