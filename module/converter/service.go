@@ -188,3 +188,34 @@ func (s *Service) TrackerRates(Date string, data []*messages.ExchangeRequest) (*
 
 	return &responses, nil
 }
+
+//DeleteExchange : function to delete list of exchanges
+func (s *Service) DeleteExchange(data []*messages.ExchangeRequest) (bool, error) {
+	if len(data) == 0 {
+		return false, errors.New("list of exchanges is empty")
+	}
+
+	tx := s.db.Begin()
+	for index := 0; index < len(data); index++ {
+		var exchange model.Exchange
+		if err := tx.Find(&exchange, "source = ? AND target = ?", data[index].From, data[index].To).Error; err != nil {
+			tx.Rollback()
+			return false, err
+		}
+
+		var daily model.DailyRate
+		if err := tx.Delete(&daily, "exchange_id = ?", exchange.ID).Error; err != nil {
+			tx.Rollback()
+			return false, errors.New(data[index].From + data[index].To + err.Error())
+		}
+
+		if err := tx.Delete(&exchange, "id = ?", exchange.ID).Error; err != nil {
+			tx.Rollback()
+			return false, errors.New(data[index].From + data[index].To + err.Error())
+		}
+
+	}
+	tx.Commit()
+
+	return true, nil
+}

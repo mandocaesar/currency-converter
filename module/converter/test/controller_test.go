@@ -21,7 +21,7 @@ func TestAPIAddDailyExchangeData(t *testing.T) {
 	Init()
 	payload := bytes.NewBuffer([]byte(`{"Date":"2018-07-12","From":"USD","To":"GBP","Rate":"0.75709"}`))
 	response := shared.DispatchRequest(router, "POST", "/api/v1/daily", payload)
-	assert.Equal(t, http.StatusOK, response.Code)
+	assert.Equal(t, http.StatusCreated, response.Code)
 }
 
 func TestAPIExchangeRateLast7(t *testing.T) {
@@ -35,5 +35,12 @@ func TestAPITrackedRates(t *testing.T) {
 	Init()
 	payload := bytes.NewBuffer([]byte(`{"Date":"2018-08-01", "Exchanges":[{"From":"USD","To":"GBP"},{"From":"USD","To":"IDR"},{"From":"JPY","To":"IDR"}]}`))
 	response := shared.DispatchRequest(router, "POST", "/api/v1/tracked", payload)
+	assert.Equal(t, http.StatusOK, response.Code)
+}
+
+func TestAPIDeleteExchange(t *testing.T) {
+	Init()
+	payload := bytes.NewBuffer([]byte(`{"Exchanges":[{"From":"USD","To":"GBP"},{"From":"USD","To":"IDR"},{"From":"JPY","To":"IDR"}]}`))
+	response := shared.DispatchRequest(router, "POST", "/api/v1/remove", payload)
 	assert.Equal(t, http.StatusOK, response.Code)
 }

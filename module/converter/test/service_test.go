@@ -54,3 +54,21 @@ func TestTrackedRates(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.NotEmpty(t, result)
 }
+
+func TestDeleteExchange(t *testing.T) {
+	Init()
+	exchange2 := &messages.ExchangeRequest{From: "USD", To: "GBP"}
+	exchange1 := &messages.ExchangeRequest{From: "USD", To: "IDR"}
+	exchange3 := &messages.ExchangeRequest{From: "JPY", To: "IDR"}
+
+	request := &messages.DeleteRequest{}
+
+	request.Exchanges = append(request.Exchanges, exchange1)
+	request.Exchanges = append(request.Exchanges, exchange2)
+	request.Exchanges = append(request.Exchanges, exchange3)
+
+	result, err := service.DeleteExchange(request.Exchanges)
+	assert.Equal(t, nil, err)
+	assert.NotEmpty(t, result)
+
+}
