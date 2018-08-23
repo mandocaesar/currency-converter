@@ -12,5 +12,5 @@ type DailyRate struct {
 	common.BaseModel
 	ExchangeID   uuid.UUID `gorm:"type:char(36); not null"`
 	ExchangeDate *time.Time
-	Rate         float32 `gorm:"decimal"`
+	Rate         float64 `gorm:"decimal"`
 }
