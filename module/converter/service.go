@@ -37,11 +37,13 @@ func (s *Service) AddExchange(from string, to string) (uuid.UUID, error) {
 	exchange := &model.Exchange{Source: from, Target: to}
 
 	if !tx.First(&exchange, "Source = ? AND Target = ?", from, to).RecordNotFound() {
+		glog.Error(errors.New("Exchange already registered"))
 		return uuid.Nil, errors.New("Exchange already registered")
 	}
 
 	if err := tx.Create(exchange).Error; err != nil {
 		tx.Rollback()
+		glog.Error(err)
 
 		return uuid.Nil, err
 	}
@@ -58,23 +60,27 @@ func (s *Service) AddDailyExchange(from string, to string, exchangeDate string, 
 
 	dt, err := time.Parse("2006-01-02", exchangeDate)
 	if err != nil {
+		glog.Error(err)
 		return uuid.Nil, err
 	}
 
 	tx := s.db.Begin()
 	var exchange model.Exchange
 	if tx.First(&exchange, "Source = ? AND Target = ?", from, to).RecordNotFound() {
+		glog.Error(errors.New("Exchange not listed, please register it first "))
 		return uuid.Nil, errors.New("Exchange not listed, please register it first ")
 	}
 
 	var check model.DailyRate
 	if !tx.First(&check, "exchange_id = ? AND exchange_date = ?", exchange.ID, dt).RecordNotFound() {
+		glog.Error(errors.New("Daily Exchange Rate Exist"))
 		return uuid.Nil, errors.New("Daily Exchange Rate Exist")
 	}
 
 	data := &model.DailyRate{ExchangeID: exchange.ID, ExchangeDate: &dt, Rate: rate}
 	if err := tx.Create(data).Error; err != nil {
 		tx.Rollback()
+		glog.Error(err)
 		return uuid.Nil, err
 	}
 	tx.Commit()
@@ -98,16 +104,19 @@ func (s *Service) ExchangeRateLast7(from string, to string, exchangeDate string)
 	tx := s.db.Begin()
 	dt, err := time.Parse("2006-01-02", exchangeDate)
 	if err != nil {
+		glog.Error(err)
 		return nil, err
 	}
 
 	if err := tx.Find(&exchange, "Source = ? AND Target = ?", from, to).Error; err != nil {
+		glog.Error(err)
 		return nil, err
 	}
 
 	end := dt.AddDate(0, 0, 6)
 
 	if err := tx.Order("exchange_date desc").Find(&dailyrates, "exchange_id = ? AND exchange_date BETWEEN ? AND ?", exchange.ID, dt.Format("2006-01-02"), end.Format("2006-01-02")).Error; err != nil {
+		glog.Error(err)
 		return nil, err
 	}
 
@@ -153,13 +162,13 @@ func (s *Service) TrackerRates(Date string, data []*messages.ExchangeRequest) (*
 		result, err := s.ExchangeRateLast7(data[index].From, data[index].To, Date)
 		if err != nil {
 			if err.Error() != "No Daily exchange rate available" {
-				glog.Infof("ExchangeRateLast7 , err=?", err)
+				glog.Error(err)
 				return nil, err
 			}
 		}
 
 		if err := s.db.Find(&exchangeModel, "Source = ? AND Target = ?", data[index].From, data[index].To).Error; err != nil {
-			glog.Infof("ExchangeModel , err=?", err)
+			glog.Error(err)
 			return nil, err
 		}
 
@@ -169,7 +178,7 @@ func (s *Service) TrackerRates(Date string, data []*messages.ExchangeRequest) (*
 		if result != nil {
 			if len(result.Data) == 7 {
 				if err := s.db.First(&dailyRateModel, "exchange_id = ? and exchange_date = ?", exchangeModel.ID, dt.Format("2006-01-02")).Error; err != nil {
-					glog.Infof("dailyRateModel , err=?", err)
+					glog.Error(err)
 					return nil, err
 				}
 				response.Avg = strconv.FormatFloat(result.Average, 'f', 6, 64)
@@ -200,17 +209,20 @@ func (s *Service) DeleteExchange(data []*messages.ExchangeRequest) (bool, error)
 		var exchange model.Exchange
 		if err := tx.Find(&exchange, "source = ? AND target = ?", data[index].From, data[index].To).Error; err != nil {
 			tx.Rollback()
+			glog.Error(err)
 			return false, err
 		}
 
 		var daily model.DailyRate
 		if err := tx.Delete(&daily, "exchange_id = ?", exchange.ID).Error; err != nil {
 			tx.Rollback()
+			glog.Error(err)
 			return false, errors.New(data[index].From + data[index].To + err.Error())
 		}
 
 		if err := tx.Delete(&exchange, "id = ?", exchange.ID).Error; err != nil {
 			tx.Rollback()
+			glog.Error(err)
 			return false, errors.New(data[index].From + data[index].To + err.Error())
 		}
 
