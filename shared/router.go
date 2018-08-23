@@ -77,7 +77,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 				"Name":       "BE-TEST-Server",
 				"message":    "OK",
 				"serverTime": time.Now().UTC(),
-				"version":    "0.1",
+				"version":    "1.0.0",
 			})
 		})
 	}
