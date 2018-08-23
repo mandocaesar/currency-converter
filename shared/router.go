@@ -74,7 +74,7 @@ func (r *Router) SetupRouter() *gin.Engine {
 	{
 		diagnostic.GET("/ping", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"Name":       "Locum-Server",
+				"Name":       "BE-TEST-Server",
 				"message":    "OK",
 				"serverTime": time.Now().UTC(),
 				"version":    "0.1",
@@ -85,6 +85,8 @@ func (r *Router) SetupRouter() *gin.Engine {
 	exchange := router.Group("api/v1")
 	{
 		exchange.POST("/exchange", r.converterController.AddExchange)
+		exchange.POST("/daily", r.converterController.AddDailyRate)
+		exchange.POST("/last7", r.converterController.TrendLast7)
 	}
 
 	return router
