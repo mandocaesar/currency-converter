@@ -1,4 +1,5 @@
-# Locum-App
+# BE-Test
+V 1.0.1
 
 BE-Test Currency Converter API written on Go using Gin-Gonic Framework (https://github.com/gin-gonic/gin) and 
 [GORM](https://github.com/jinzhu/gorm) as ORM Framework
